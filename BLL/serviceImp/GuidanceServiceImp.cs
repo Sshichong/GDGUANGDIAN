@@ -5,11 +5,24 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Model;
 
 namespace BLL.serviceImp
 {
     public class GuidanceServiceImp : GuidanceService
     {
+        /// <summary>
+        /// 设置项，插入数据库
+        /// </summary>
+        /// <param name="databaseAddress"></param>
+        /// <param name="databaseName"></param>
+        /// <param name="userName"></param>
+        /// <param name="anotherName"></param>
+        /// <param name="databasePwd"></param>
+        /// <param name="recordAddress"></param>
+        /// <param name="recordUserName"></param>
+        /// <param name="recordPwd"></param>
+        /// <returns></returns>
         public int  AddGuidanceInformation(string databaseAddress, string databaseName,
             string userName, string anotherName, string databasePwd, string recordAddress, string recordUserName, string recordPwd)
         {
@@ -56,6 +69,32 @@ namespace BLL.serviceImp
             return flag;
 
             // MySqlParameter pamarmeter = new MySqlParameter("@username",userName);
+        }
+
+        /// <summary>
+        /// 设置项下的显示查询
+        /// </summary>
+        /// <returns></returns>
+        public List<Guidance> GetGuidance()
+        {
+            string sql = "selecet AnotherName,DatabaseAddress,DatabaseName,UserName from guidance";
+            MySqlHelper db = new MySqlHelper();
+            DataSet guidances = db.GetDataSet(MySqlHelper.Conn, CommandType.Text, sql, null);
+            DataTable dt = guidances.Tables[0];
+            List<Guidance> list = new List<Guidance>();
+
+            //遍历DataTable 封装成List<Guidance>
+            foreach (DataRow dr in dt.Rows)
+            {
+                Guidance gd = new Guidance();
+                gd.anotherName = dr["AnotherName"].ToString();
+                gd.datebaseAddress = dr["DatabaseAddress"].ToString();
+                gd.databaseName = dr["DatabaseName"].ToString();
+                gd.userName = dr["UserName"].ToString();
+                list.Add(gd);
+            }
+
+            return list;
         }
     }
 }

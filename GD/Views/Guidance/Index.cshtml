@@ -5,6 +5,12 @@
 
 <h2>setGuidInformation</h2>
 
+@if (ViewBag.Message != null)
+{
+    <p style="color:red">
+        @ViewBag.Message
+    </p>
+}
 <form action="/Guidance/SetGuidInformation" method="post">
     <div style="float:left">
         数据库地址：<input type="text" name="datebaseAddress" style="margin-bottom：20px" /><br />
