@@ -1,0 +1,10 @@
+D:\users\研发\source\repos\GD\DAL\bin\Debug\DAL.dll
+D:\users\研发\source\repos\GD\DAL\bin\Debug\DAL.pdb
+D:\users\研发\source\repos\GD\DAL\bin\Debug\Model.dll
+D:\users\研发\source\repos\GD\DAL\bin\Debug\MySql.Data.dll
+D:\users\研发\source\repos\GD\DAL\bin\Debug\Model.pdb
+D:\users\研发\source\repos\GD\DAL\obj\Debug\DAL.csprojAssemblyReference.cache
+D:\users\研发\source\repos\GD\DAL\obj\Debug\DAL.csproj.CoreCompileInputs.cache
+D:\users\研发\source\repos\GD\DAL\obj\Debug\DAL.csproj.CopyComplete
+D:\users\研发\source\repos\GD\DAL\obj\Debug\DAL.dll
+D:\users\研发\source\repos\GD\DAL\obj\Debug\DAL.pdb

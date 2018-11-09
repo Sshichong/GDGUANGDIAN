@@ -1,0 +1,21 @@
+﻿@{
+    ViewBag.Title = "Login Page";
+}
+
+<div style="margin-top:100px">
+    @if (ViewBag.Message != null)
+    {
+        <p style="color:red">@ViewBag.Message</p>
+    }
+        <form action="/Home/Login" method="post">
+            <div>
+            用户名：<input type="text" name="username" /><br />
+            密码：&nbsp;&nbsp;&nbsp;<input type="password" name="password" /><br />
+            </div>
+            <div>
+            <input type="submit" value="登录">
+            </div>
+        </form>
+</div>
+
+

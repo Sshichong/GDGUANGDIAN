@@ -1,0 +1,12 @@
+D:\users\研发\source\repos\GD\BLL\bin\Debug\BLL.dll
+D:\users\研发\source\repos\GD\BLL\bin\Debug\BLL.pdb
+D:\users\研发\source\repos\GD\BLL\bin\Debug\DAL.dll
+D:\users\研发\source\repos\GD\BLL\bin\Debug\Model.dll
+D:\users\研发\source\repos\GD\BLL\bin\Debug\MySql.Data.dll
+D:\users\研发\source\repos\GD\BLL\bin\Debug\DAL.pdb
+D:\users\研发\source\repos\GD\BLL\bin\Debug\Model.pdb
+D:\users\研发\source\repos\GD\BLL\obj\Debug\BLL.csprojAssemblyReference.cache
+D:\users\研发\source\repos\GD\BLL\obj\Debug\BLL.csproj.CoreCompileInputs.cache
+D:\users\研发\source\repos\GD\BLL\obj\Debug\BLL.csproj.CopyComplete
+D:\users\研发\source\repos\GD\BLL\obj\Debug\BLL.dll
+D:\users\研发\source\repos\GD\BLL\obj\Debug\BLL.pdb
