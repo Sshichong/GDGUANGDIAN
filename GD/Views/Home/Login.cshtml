@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+@{
+    ViewBag.Title = "登录页面";
+    Layout = null;
+}
+
+<html>
+<head>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-resource.js"></script>
+
+    <link href="~/Scripts/elementui/index.css" rel="stylesheet" />
+    <script src="~/Scripts/elementui/index.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div style="border:1px solid #ebebeb;border-radius:3px;width:350px; margin:100px auto;">
+            <div style="padding:24px;">
+                <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px">
+                    <el-form-item label="用户名" prop="username">
+                        <el-input type="text" v-model="ruleForm.username" placeholder="请输入用户名" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="确认密码" prop="password">
+                        <el-input type="password" v-model="ruleForm.password" placeholder="请输入密码" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" v-on:click="submit()">提交</el-button>
+                        <el-button v-on:click="reset()">重置</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </div>
+    </div>
+    <script>
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                ruleForm: {
+                    username: '',
+                    password: ''
+                },
+                rules: {
+                    username: [
+                        { required: true, message: '请输入用户名', trigger: 'blur' }
+                    ],
+                    password: [
+                        { required: true, message: '请输入密码', trigger: 'blur' }
+                    ]
+                }
+            },
+            methods: {
+                submit: function () {
+                    this.$refs["ruleForm"].validate((valid) => {
+                        if (valid) {
+                            this.$http.post("/api/data/login", {}, {
+                                params: {
+                                    username: this.ruleForm.username,
+                                    password: this.ruleForm.password
+                                }
+                            }).then(res => {
+                                let data = JSON.parse(res.data);
+                                if (data.Code === 0) {
+                                    location.href = "/home/index"
+                                }
+                                else {
+                                    this.$message({
+                                        type: "error",
+                                        message: data.Msg,
+                                    })
+                                }
+                            });
+                        }
+                    });
+                },
+                reset: function () {
+                    this.$refs["ruleForm"].resetFields();
+                }
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+﻿* { padding: 0; margin: 0; }
+body { background: #363636; }
+.sysname { margin: 34px 0 0 40px; font-size: 48px; color: #fff; border-bottom: 3px solid #409EFF; width: 340px; }
+.tabwrap { text-align: center; margin-top: 23px; }
+.tabwrap .tabItem { font-size: 24px; color: #fff; margin-right: 50px; cursor: pointer }
+.tabwrap .tabItem.current { border-bottom: 3px solid #409EFF }
+.contentwrap { width: 1240px; margin: 10px auto; }
+.search { margin-top: 51px; text-align: center; color:#fff; }
+.search .keyword { width: 381px; margin-right: 12px; }
+.tablewrap { margin-top: 40px; }
+.tablewrap .table { background: #252525; }
+.table .el-table__body-wrapper { border: 1px solid #979797; }
+.table .table:before { background: #252525; }
+.table .table-header-cell { background: #151515; color: #fff; text-align: center; border-bottom: 0 !important; }
+.table .table-cell { background: #151515; text-align: center; color: #fff; border-bottom: 0 !important; }
+.table .table-row:hover > .table-cell { background-color: #979797 !important; color: #C2D2EF !important; }
+.table .current-row .table-cell { background-color: #979797 !important; color: #C2D2EF !important; }

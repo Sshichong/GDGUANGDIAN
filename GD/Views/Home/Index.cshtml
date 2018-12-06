@@ -1,0 +1,596 @@
+﻿@{
+    Layout = null;
+}
+<html>
+<head>
+    <title>数字导播查询</title>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-resource.js"></script>
+
+    <link href="~/Scripts/elementui/index.css" rel="stylesheet" />
+    <script src="~/Scripts/elementui/index.js"></script>
+
+    <script src="~/Scripts/echarts.common.min.js"></script>
+    <script src="~/Scripts/utils/date.js"></script>
+    <script src="~/Scripts/utils/moment.js"></script>
+    <link href="~/Content/index.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        <div class="sysname">
+            数字导播查询
+        </div>
+        <div class="tabwrap">
+                <span class="tabItem" v-bind:class='{current:tab.current===window.enums.tab.record}' v-on:click="setTab(window.enums.tab.record)">通话记录</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.statistics}" v-on:click="setTab(window.enums.tab.statistics)">统计分析</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.tape}" v-on:click="setTab(window.enums.tab.tape)">电话录音</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.set}" v-on:click="setTab(window.enums.tab.set)">设置</span>
+        </div>
+        <div class="contentwrap">
+            <div class="recordpart" v-show="tab.current === window.enums.tab.record">
+                <div class="search">
+                    <el-input placeholder="输入主持人姓名或呼入电话" class="keyword" v-model="tab.record.keyword"></el-input>
+                    <el-button class="el-button--primary" v-on:click="searchCallRecord()" >查询</el-button>
+                    <el-button v-on:click="exportExcel()">导出</el-button>
+                </div>
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="445">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180"></el-table-column>
+                        <el-table-column prop="startTime" label="日期" width="180"></el-table-column>
+                        <el-table-column prop="hostname" label="主持人"></el-table-column>
+                        <el-table-column prop="called" label="呼入电话"></el-table-column>
+                        <el-table-column prop="callTime" label="时长"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="statisticspart" v-show="tab.current === window.enums.tab.statistics">
+                <div id="chartWrap" style="width:100%; height:380px;"></div>
+
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list3"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="200">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180"></el-table-column>
+                        <el-table-column prop="dayTotal" label="日" width="180"></el-table-column>
+                        <el-table-column prop="weekTotal" label="周"></el-table-column>
+                        <el-table-column prop="monthTotal" label="月"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="tapepart" v-show="tab.current === window.enums.tab.tape">
+                <div class="search">
+                    <el-date-picker v-model="tab.tape.search.starttime"
+                                    type="date"
+                                    placeholder="">
+                    </el-date-picker>
+                    到
+                    <el-date-picker v-model="tab.tape.search.endtime"
+                                    type="date"
+                                    placeholder="">
+                    </el-date-picker>
+                    <el-input placeholder="文件名" class="keyword" v-model="tab.tape.search.keyword"></el-input>
+                    <el-button class="el-button--primary" v-on:click="searchSoundRecord()">查询</el-button>
+                </div>
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list1"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="445">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180"></el-table-column>
+                        <el-table-column prop="fileName" label="文件名称" width="180"></el-table-column>
+                        <el-table-column prop="fileSize" label="文件大小"></el-table-column>
+                        <el-table-column prop="fileLen" label="时长"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="setpart" v-show="tab.current === window.enums.tab.set">
+                <div class="search">
+                    @*<el-input placeholder="输入主持人姓名或呼入电话" class="keyword"></el-input>*@
+                    
+                        <div style="margin-bottom:10px" :rules="rules">
+                            <span>数据库地址：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.databaseAddress"></el-input>
+                            <span>数据库名称：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.databaseName"></el-input>
+                            <span style="padding:15px">用户名：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.username" ></el-input>
+                        </div>
+
+                        <div>
+                            <span style="padding-left:0px;padding-right:30px">密码：</span>
+                            <el-input class="keyword" style="width:200px;margin-left:-20px" v-model="tab.set.databasePwd" type="password"></el-input>
+                            <span style="padding-left:20px;padding-right:20px">别名：</span>
+                            <el-input class="keyword" style="width:200px;margin-right:130px"  v-model="tab.set.databaseAnotherName" ></el-input>
+                           
+                            
+                                <el-button class="el-button--primary" v-on:click="check()">测试</el-button>
+                                <el-button v-on:click="addDatabase()">加入</el-button>
+                            
+                        </div>
+                   
+
+                </div>
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list2"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="445">
+                        <el-table-column prop="anotherName" label="导播别名" width="180"></el-table-column>
+                        <el-table-column prop="databaseAddress" label="IP地址" width="180"></el-table-column>
+                        <el-table-column prop="databaseName" label="数据库名称"></el-table-column>
+                        <el-table-column prop="userName" label="用户名"></el-table-column>
+                    </el-table>
+                </div>
+                @*<div v-if="true" style="border:1px solid #ebebeb;border-radius:3px;width:350px; margin:100px auto;">
+            <div style="padding:24px;">
+                <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px">
+                    <el-form-item label="数据库地址" prop="databaseAddress">
+                        <el-input type="text" v-model="ruleForm.databaseAddress" placeholder="请输数据库地址" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库名称" prop="databaseName">
+                        <el-input type="text" v-model="ruleForm.databaseName" placeholder="请输入数据库名称" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库用户名" prop="username">
+                        <el-input type="text" v-model="ruleForm.username" placeholder="请输入数据库名称" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库密码" prop="databasePwd">
+                        <el-input type="password" v-model="ruleForm.databasePwd" placeholder="请输入数据库密码" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" v-on:click="submit()">测试</el-button>
+
+                    </el-form-item>
+
+                </el-form>
+            </div>
+        </div>*@
+            </div>
+        </div>
+    </div>
+    <script>
+        var enums = {
+            tab: {
+                record: 0,//通话记录
+                statistics: 1, //统计
+                tape: 2,//录音
+                set: 3//设置
+            }
+        }
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                tab: {
+                    //当前tab
+                    current: enums.tab.record,
+                    //通话记录
+                    record: {
+                        list: [
+                            //{ Id: "1", databaseAnother:"交通之声",date: "2018-11-28", hostname: "张科",calling:"123",calltime:"12" },
+                            //{ Id: "2", databaseAnother: "交通之声", date: "2018-11-28", hostname: "张科", calling: "123", calltime: "12" },
+                            //{ Id: "3", databaseAnother: "交通之声", date: "2018-11-28", hostname: "张科", calling: "123", calltime: "12" }
+                        ],
+                        list1: [
+                            //{ Id: "1", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123"},
+                            //{ Id: "2", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123",  },
+                            //{ Id: "3", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123",  },
+                        ],
+                        list2: [],
+                        list3:[], 
+                        keyword:""
+
+
+                    },
+                    //统计
+                    statistics: {
+                        option : {
+                            title: {
+                                show: false,
+                            },
+                            textStyle: {
+                                color: "#fff"
+                            },
+                            tooltip: {},
+                            xAxis: {
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "#757575"
+                                    }
+                                },
+                               // data: ["城市之声", "交通之声", "音乐之声", "城市之声", "交通之声", "音乐之声"],
+                                data:[],
+                            },
+                            yAxis: {
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "#757575"
+                                    }
+                                },
+                                splitLine: { show: false },
+                            },
+                            series: [
+                                {
+                                    name: '日',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#F56C6C"
+                                    },
+                                   // data: [5, 20, 36, 10, 10, 20]
+                                    data:[]
+                                },
+                                {
+                                    name: '周',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#1DE9B6"
+                                    },
+                                    //data: [5, 20, 36, 10, 10, 20]
+                                    data:[]
+                                },
+                                {
+                                    name: '月',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#EC9F38"
+                                    },
+                                  //  data: [5, 20, 36, 10, 10, 20]
+                                    data:[]
+                                }
+                            ]
+                        }
+                    },
+                    //录音
+                    tape: {
+                        search: {
+                            starttime: fecha.prevDate(new Date(), 7),
+                            endtime: new Date(),
+                            keyword:""
+                        }
+                    },
+                    //设置
+                    set: {
+                        databaseAddress: "",
+                        databaseName: "",
+                        databasePwd: "",
+                        username: "",
+                        anothername:""
+                    }
+                },
+                ruleForm: {
+                    databaseAddress: '',
+                    databaseName: '',
+                    username: '',
+                    databasePwd: ''
+
+                },
+                rules: {
+                    databaseAddress: [
+                        { required: true, message: '请输入数据库地址', trigger: 'blur' }
+                    ],
+                    databaseName: [
+                        { required: true, message: '请输入数据库名称', trigger: 'blur' }
+                    ],
+                    username: [
+                        { required: true, message: '请输入用户名', trigger: 'blur' }
+                    ],
+                    databasePwd: [
+                        { required: true, message: '请输入密码', trigger: 'blur' }
+                    ],
+                    databaseAnotherName: [
+                        { required: true,message:'请输入别名',trigger:'blur' }
+                    ]
+
+                }
+            },
+            created: function () {
+                this.window = window;
+                this.getCallRecords();
+                this.getSoundRecords();
+                this.getDatabaseInfos();
+                this.getStatistics();
+            },
+            mounted: function () {
+                window.myChart = echarts.init(document.getElementById('chartWrap'));
+
+            },
+            methods: {
+                //切换标签
+                setTab: function (value) {
+                    this.tab.current = value;
+                    if (value === enums.tab.statistics) {
+                        this.$nextTick(() => {
+                            myChart.setOption(this.tab.statistics.option);
+                            myChart.resize();
+                        });
+                    };
+                    
+
+                },
+                getCallRecords: function () {//获取全部通话记录
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/GetCallRecordAll",
+                    }).then(function (response) {
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        if (body.Code === 0) {
+                            //for (var i = 0; i < body.Data.length; i++) {
+                            //   let item  = {};
+                            //    item.Id = body.Data[i].pkid;
+                            //    item.databaseAnother = body.Data[i].databaseAnotherName;
+                            //    item.date = body.Data[i].startTime;
+                            //    item.hostname = body.Data[i].hostname;
+                            //    item.calling = body.Data[i].called;
+                            //    item.calltime = body.Data[i].callTime;
+                            //    this.tab.record.list.push(item);
+                            //}
+                            //body.Data.callTime = body.Data.callTime + "ms";
+                            
+                            this.tab.record.list = body.Data;
+                        } else {
+                          
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            })
+                        }
+                       // this.record.list = response.data;
+                    }, function (error) {
+                        //
+                        for (var i = 0; i < body.Data.length; i++) {
+                            this.tab.record.list.pop();
+                        }
+                        this.$message({
+                            type: "error",
+                            message: body.Msg,
+                        })
+                    })
+                },
+                getSoundRecords: function () { //获取全部录音记录
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getSoundRecordAll",
+                    }).then(function (response) {
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        if (body.Code===0) {
+                            this.tab.record.list1 = body.Data;
+                        } else {
+                            for (var i = 0; i < body.Data.length; i++) {
+                                this.tab.record.list1.pop();
+                            }
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            })
+                            }
+                        }, function (error) {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        })
+                },
+                getDatabaseInfos: function () {
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getDatabaseInfoAll",
+                    }).then(function (response) {
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        if (body.Code === 0) {
+                            this.tab.record.list2 = body.Data;
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            })
+                        }
+                    }, function (error) {
+                        this.$message({
+                            type: "error",
+                            message: body.Msg
+                        })
+                    })
+                },
+                addDatabase: function () {
+                    this.$http.post("/api/data/AddDataBase", null, {
+                        params: {
+                            databaseAddress: this.tab.set.databaseAddress,
+                            databaseName: this.tab.set.databaseName,
+                            databasePwd: this.tab.set.databasePwd,
+                            username: this.tab.set.username,
+                            anothername: this.tab.set.anothername
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            location.href = "/home/index"
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+
+                        }, (error) => {
+                        this.$message({
+                            type: "error",
+                            message: error
+                        })
+                        })
+                },
+                check: function () {
+                    this.$http.post("/api/data/CheckDataBase", null, {
+                        params: {
+                            databaseAddress: this.tab.set.databaseAddress,
+                            databaseName: this.tab.set.databaseName,
+                            databasePwd: this.tab.set.databasePwd,
+                            username: this.tab.set.username,
+                            anothername: this.tab.set.anothername
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.$message({
+                                type: "success",
+                                message: body.Msg
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message: error
+                            })
+                        })
+                },
+                searchCallRecord: function () {
+                    this.$http.post("/api/data/getCallRecordByKey", null, {
+                        params: {
+                            keyword: this.tab.record.keyword
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.tab.record.list = body.Data;
+                        } else {
+                            this.tab.record.list = [];
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message:error
+                            })
+                        })
+                },
+                searchSoundRecord: function () {
+                    console.log(moment(this.tab.tape.search.starttime).format("YYYY-MM-DD"));
+                    console.log(moment(this.tab.tape.search.endtime).format("YYYY-MM-DD"));
+                    console.log(this.tab.tape.search.keyword);
+                    this.$http.post("/api/data/getSoundRecordByKey", null, {
+                        params: {
+                            starttime: moment(this.tab.tape.search.starttime).format("YYYY-MM-DD"),
+                            endtime: moment(this.tab.tape.search.endtime).format("YYYY-MM-DD"),
+                            keyword: this.tab.tape.search.keyword
+                        }
+                        
+                    }).then((res) => {
+                        
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.tab.record.list1 = body.Data;
+                        } else {
+                            this.tab.record.list1 = [];
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message: error
+                            })
+                        })
+                    
+                },
+                getStatistics: function () {
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getStatistics"
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.tab.record.list3 = body.Data;
+                            for (var i = 0; i < body.Data.length; i++) {
+                                this.tab.statistics.option.xAxis.data.push(body.Data[i].databaseAnotherName);
+                                this.tab.statistics.option.series[0].data.push(body.Data[i].dayTotal);
+                                this.tab.statistics.option.series[1].data.push(body.Data[i].weekTotal);
+                                this.tab.statistics.option.series[2].data.push(body.Data[i].monthTotal);
+
+                            }
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message: error
+                            })
+                        })
+                },
+                exportExcel: function () {
+                    console.log(this.tab.record.list);
+                    this.$http.post("/api/data/exportExcel", null, {
+                        params: {
+                            keyword: this.tab.record.keyword,
+                            file: "D:/CallRecords.xlsx"
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.$message({
+                                type: "success",
+                                message: body.Msg
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message: error
+                            })
+                        })
+                   
+                },
+                reset: function () {
+                    this.$refs["ruleForm"].resetFields();
+                }
+            }
+        })
+    </script>
+</body>
+</html>
