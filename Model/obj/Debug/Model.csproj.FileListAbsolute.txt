@@ -1,0 +1,6 @@
+D:\gd\trunk\Model\bin\Debug\Model.dll
+D:\gd\trunk\Model\bin\Debug\Model.pdb
+D:\gd\trunk\Model\obj\Debug\Model.csprojAssemblyReference.cache
+D:\gd\trunk\Model\obj\Debug\Model.csproj.CoreCompileInputs.cache
+D:\gd\trunk\Model\obj\Debug\Model.dll
+D:\gd\trunk\Model\obj\Debug\Model.pdb

@@ -1,0 +1,5 @@
+D:\gd\trunk\Model\bin\Release\Model.dll
+D:\gd\trunk\Model\bin\Release\Model.pdb
+D:\gd\trunk\Model\obj\Release\Model.csproj.CoreCompileInputs.cache
+D:\gd\trunk\Model\obj\Release\Model.dll
+D:\gd\trunk\Model\obj\Release\Model.pdb

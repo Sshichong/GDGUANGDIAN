@@ -1,0 +1,148 @@
+﻿
+@{
+    ViewBag.Title = "AddDataBase";
+}
+
+<head>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-resource.js"></script>
+
+    <link href="~/Scripts/elementui/index.css" rel="stylesheet" />
+    <script src="~/Scripts/elementui/index.js"></script>
+</head>
+<html>
+<head>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-resource.js"></script>
+
+    <link href="~/Scripts/elementui/index.css" rel="stylesheet" />
+    <script src="~/Scripts/elementui/index.js"></script>
+</head>
+<body>
+    <div id="app">
+        <div style="border:1px solid #ebebeb;border-radius:3px;width:350px; margin:100px auto;">
+            <div style="padding:24px;">
+                <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px">
+                    <el-form-item label="数据库地址" prop="databaseAddress">
+                        <el-input type="text" v-model="ruleForm.databaseAddress" placeholder="请输数据库地址" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库名称" prop="databaseName">
+                        <el-input type="text" v-model="ruleForm.databaseName" placeholder="请输入数据库名称" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库密码" prop="databasePwd">
+                        <el-input type="password" v-model="ruleForm.databasePwd" placeholder="请输入数据库密码" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户名" prop="username">
+                        <el-input type="text" v-model="ruleForm.username" placeholder="请输入用户名" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="别名" prop="anothername">
+                        <el-input type="text" v-model="ruleForm.anothername" placeholder="请输入别名" autocomplete="off"></el-input>
+                    </el-form-item>
+                    @*<el-form-item>
+            <el-button type="primary" v-on:click="submit()">测试</el-button>
+            <el-button v-on:click="reset()">重置</el-button>
+        </el-form-item>*@
+
+                    <hr />
+
+                    <el-form-item label="录音地址" prop="recordAddress">
+                        <el-input type="text" v-model="ruleForm.recordAddress" placeholder="请输录音地址" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户名" prop="recordName">
+                        <el-input type="text" v-model="ruleForm.recordName" placeholder="请输入用户名" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop="recordPwd">
+                        <el-input type="password" v-model="ruleForm.recordPwd" placeholder="请输入密码" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+            <el-button type="primary" v-on:click="submit()">加入</el-button>
+           @* <el-button v-on:click="reset()">重置</el-button>*@
+        </el-form-item>
+
+                </el-form>
+            </div>
+        </div>
+    </div>
+
+   
+    <script>
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                ruleForm: {
+                    databaseAddress: '',
+                    databaseName: '',
+                    databasePwd: '',
+                    username: '',
+                    anothername:'',
+                    recordAddress: '',
+                    recordName: '',
+                    recordPwd:''
+
+                },
+                rules: {
+                    databaseAddress: [
+                        { required: true, message: '请输入数据库地址', trigger: 'blur' }
+                    ],
+                    databaseName: [
+                        { required: true, message: '请输入数据库名称', trigger: 'blur' }
+                    ],
+                    databasePwd: [
+                        { required: true, message: '请输入密码', trigger: 'blur' }
+                    ],
+                    username: [
+                        { required: true,message:'请输入用户名',trigger:'blur' }
+                    ],
+                    anothername: [
+                        { required: true, message: '请输入别名', tirgger:"blur" }
+                    ],
+                    recordAddress: [
+                        { required: true, message: '请输入录音地址', trigger:'blur' }
+                    ],
+                    recordName: [
+                        { required: true, message: '请输入录音地址', trigger: 'blur' }
+                    ],
+                    recordPwd: [
+                        { required: true, message: '请输入录音地址', trigger: 'blur' }
+                    ]
+                }
+            },
+            methods: {
+                submit: function () {
+                    this.$refs["ruleForm"].validate((valid) => {
+                        if (valid) {
+                            this.$http.post("/api/data/AddDataBase", {}, {
+                                params: {
+                                    databaseAddress: this.ruleForm.databaseAddress,
+                                    databaseName: this.ruleForm.databaseName,
+                                    databasePwd: this.ruleForm.databasePwd,
+                                    username: this.ruleForm.username,
+                                    anothername: this.ruleForm.anothername,
+                                    recordAddress: this.ruleForm.recordAddress,
+                                    recordName: this.ruleForm.recordName,
+                                    recordPwd: this.ruleForm.recordPwd
+                                }
+                            }).then(res => {
+                                let data = JSON.parse(res.data);
+                                if (data.Code === 0) {
+                                    location.href = "/home/index"
+                                }
+                                else {
+                                    this.$message({
+                                        type: "error",
+                                        message: data.Msg,
+                                    })
+                                }
+                            });
+                        }
+                    });
+                },
+                reset: function () {
+                    this.$refs["ruleForm"].resetFields();
+                }
+            }
+        })
+
+    </script>
+</body>
+</html>

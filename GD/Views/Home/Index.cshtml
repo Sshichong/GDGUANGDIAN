@@ -1,0 +1,808 @@
+﻿@{
+    Layout = null;
+}
+<html>
+<head>
+    <title>数字导播查询</title>
+    <script src="~/Scripts/vue/vue.js"></script>
+    <script src="~/Scripts/vue/vue-resource.js"></script>
+
+    <link href="~/Scripts/elementui/index.css" rel="stylesheet" />
+    <script src="~/Scripts/elementui/index.js"></script>
+    <script>
+        window.Vue.directive('loadmore', {
+            bind(el, binding) {
+                const selectWrap = el.querySelector('.el-table__body-wrapper')
+                selectWrap.addEventListener('scroll', function () {
+                    let sign = 100
+                    const scrollDistance = this.scrollHeight - this.scrollTop - this.clientHeight
+                    if (scrollDistance <= sign) {
+                        binding.value()
+                    }
+                })
+            }
+        })
+    </script>
+    <script src="~/Scripts/echarts.common.min.js"></script>
+    <script src="~/Scripts/utils/date.js"></script>
+    <script src="~/Scripts/utils/moment.js"></script>
+    <link href="~/Content/index.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="app">
+        <div class="sysname">
+            数字导播查询
+        </div>
+        <div style="float:right;margin:-60px 30px 0 0"><el-button type="primary" v-on:click="LogOut()">退出</el-button></div>
+        <div  class="tabwrap">
+                <span class="tabItem" v-bind:class='{current:tab.current===window.enums.tab.record}' v-on:click="setTab(window.enums.tab.record)">通话记录</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.statistics}" v-on:click="setTab(window.enums.tab.statistics)">统计分析</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.tape}" v-on:click="setTab(window.enums.tab.tape)">电话录音</span>
+                <span class="tabItem" v-bind:class="{current:tab.current===window.enums.tab.set}" v-on:click="setTab(window.enums.tab.set)">设置</span>
+        </div>
+        <div  class="contentwrap">
+            <div class="recordpart" v-show="tab.current === window.enums.tab.record">
+                <div class="search">
+                    <el-input placeholder="输入主持人姓名或呼入电话" class="keyword" v-model="tab.record.keyword"></el-input>
+                    <el-button class="el-button--primary" v-on:click="searchCallRecord()" >查询</el-button>
+                    <el-button v-on:click="exportExcel()">导出</el-button>
+                </div>
+                <div class="tablewrap" >
+                    <el-table :data="tab.record.list"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              v-loadmore="morerecord"
+                              style="width: 100%" height="445">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180" ></el-table-column>
+                        <el-table-column prop="startTime" label="日期" width="180"></el-table-column>
+                        <el-table-column prop="hostname" label="主持人"></el-table-column>
+                        <el-table-column prop="called" label="呼入电话"></el-table-column>
+                        <el-table-column prop="callTime" label="时长"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="statisticspart" v-show="tab.current === window.enums.tab.statistics">
+                <div id="chartWrap" style="width:100%; height:380px;"></div>
+
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list3"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="200">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180"></el-table-column>
+                        <el-table-column prop="dayTotal" label="日" width="180"></el-table-column>
+                        <el-table-column prop="weekTotal" label="周"></el-table-column>
+                        <el-table-column prop="monthTotal" label="月"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="tapepart" v-show="tab.current === window.enums.tab.tape">
+                <div class="search">
+                    <el-date-picker v-model="tab.tape.search.starttime"
+                                    type="date"
+                                    placeholder="">
+                    </el-date-picker>
+                    到
+                    <el-date-picker v-model="tab.tape.search.endtime"
+                                    type="date"
+                                    placeholder="">
+                    </el-date-picker>
+                    <el-input placeholder="文件名或频率" class="keyword" v-model="tab.tape.search.keyword"></el-input>
+                    <el-button class="el-button--primary" v-on:click="searchSoundRecord()">查询</el-button>
+                </div>
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list1"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              v-loadmore="moreSoundsrecord"
+                              highlight-current-row
+                              style="width: 100%" height="445"
+                              v-on:cell-click="tapeCellClick">
+                        <el-table-column prop="databaseAnotherName" label="频率" width="180"></el-table-column>
+                        <el-table-column prop="fileName" label="文件名称" width="180" class-name="pointer"></el-table-column>
+                        <el-table-column prop="starttime" label="开始时间"></el-table-column>
+                        <el-table-column prop="endtime" label="结束时间"></el-table-column>
+                        <el-table-column prop="fileLen" label="时长"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div class="setpart" v-show="tab.current === window.enums.tab.set">
+                <div class="search">
+                        <div style="margin-bottom:10px" :rules="rules">
+                            <span>数据库地址：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.databaseAddress"></el-input>
+                            <span>数据库名称：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.databaseName"></el-input>
+                            <span style="padding:15px">用户名：</span><el-input class="keyword" style="width:200px"  v-model="tab.set.username" ></el-input>
+                        </div>
+
+                        <div>
+                            <span style="padding-left:0px;padding-right:30px">密码：</span>
+                            <el-input class="keyword" style="width:200px;margin-left:-20px" v-model="tab.set.databasePwd" type="password"></el-input>
+                            <span style="padding-left:20px;padding-right:20px">别名：</span>
+                            <el-input class="keyword" style="width:200px;margin-right:130px"  v-model="tab.set.anothername" ></el-input>
+                           
+                            
+                                <el-button class="el-button--primary" v-on:click="check()">测试</el-button>
+                                <el-button v-on:click="addDatabase()">加入</el-button>
+                            
+                        </div>
+                   
+
+                </div>
+                <div class="tablewrap">
+                    <el-table :data="tab.record.list2"
+                              class="table"
+                              header-cell-class-name="table-header-cell"
+                              row-class-name="table-row"
+                              cell-class-name="table-cell"
+                              highlight-current-row
+                              style="width: 100%" height="445">
+                        <el-table-column prop="anotherName" label="导播别名" width="250"></el-table-column>
+                        <el-table-column prop="databaseAddress" label="IP地址" width="200"></el-table-column>
+                        <el-table-column prop="databaseName" label="数据库名称"></el-table-column>
+                        <el-table-column prop="userName" label="用户名" ></el-table-column>
+                        <el-table-column fixed="right"
+                                         label="操作"
+                                         width="100">
+                            <template slot-scope="scope">
+                                <el-button v-on:click="handleClick(scope.row)" type="text" size="small">删除</el-button>
+                            </template>
+                        </el-table-column>
+
+                    </el-table>
+                    <input prop="pkid" label="pkid" style="display:none" v-model="tab.record.pkid" />
+                </div>
+                @*<div v-if="true" style="border:1px solid #ebebeb;border-radius:3px;width:350px; margin:100px auto;">
+            <div style="padding:24px;">
+                <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="80px">
+                    <el-form-item label="数据库地址" prop="databaseAddress">
+                        <el-input type="text" v-model="ruleForm.databaseAddress" placeholder="请输数据库地址" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库名称" prop="databaseName">
+                        <el-input type="text" v-model="ruleForm.databaseName" placeholder="请输入数据库名称" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库用户名" prop="username">
+                        <el-input type="text" v-model="ruleForm.username" placeholder="请输入数据库名称" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item label="数据库密码" prop="databasePwd">
+                        <el-input type="password" v-model="ruleForm.databasePwd" placeholder="请输入数据库密码" autocomplete="off"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="primary" v-on:click="submit()">测试</el-button>
+
+                    </el-form-item>
+
+                </el-form>
+            </div>
+        </div>*@
+            </div>
+        </div>
+        <audio ref="audio" v-bind:src="audiourl" style="display:none" v-on:error="palyerror">
+        </audio>
+        <iframe v-bind:src="downloadurl" style="display:none"></iframe>
+    </div>
+    <script>
+        var enums = {
+            tab: {
+                record: 0,//通话记录
+                statistics: 1, //统计
+                tape: 2,//录音
+                set: 3//设置
+            }
+        }
+        var vue = new Vue({
+            el: "#app",
+            data: {
+                tab: {
+                    //当前tab
+                    current: enums.tab.record,
+                    //通话记录
+                    record: {
+                        list: [
+                            //{ Id: "1", databaseAnother:"交通之声",date: "2018-11-28", hostname: "张科",calling:"123",calltime:"12" },
+                            //{ Id: "2", databaseAnother: "交通之声", date: "2018-11-28", hostname: "张科", calling: "123", calltime: "12" },
+                            //{ Id: "3", databaseAnother: "交通之声", date: "2018-11-28", hostname: "张科", calling: "123", calltime: "12" }
+                        ],
+                        list1: [
+                            //{ Id: "1", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123"},
+                            //{ Id: "2", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123",  },
+                            //{ Id: "3", databaseAnotherName: "交通之声", fileName: "录音", fileSize: "10m", fileLen: "123",  },
+                        ],
+                        list2: [],
+                        list3: [],
+                        keyword: "",
+                        //加载中
+                        loading: false,
+                        page: 1,
+                        pagesize: 10
+
+                    },
+                    //统计
+                    statistics: {
+                        option: {
+                            title: {
+                                show: false,
+                            },
+                            textStyle: {
+                                color: "#fff"
+                            },
+                            tooltip: {},
+                            xAxis: {
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "#757575"
+                                    }
+                                },
+                                axisLabel: {
+                                    interval: 0
+                                },
+                                data: []
+                                //data:["daobo","daobo_1"],
+                            },
+                            yAxis: {
+                                axisLine: {
+                                    lineStyle: {
+                                        color: "#757575"
+                                    }
+                                },
+                                splitLine: { show: false },
+                            },
+                            series: [
+                                {
+                                    name: '日',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#F56C6C"
+                                    },
+                                    // data: [5, 20, 36, 10, 10, 20]
+                                    data: []
+                                },
+                                {
+                                    name: '周',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#1DE9B6"
+                                    },
+                                    //data: [5, 20, 36, 10, 10, 20]
+                                    data: []
+                                },
+                                {
+                                    name: '月',
+                                    type: 'bar',
+                                    label: {
+                                        show: true,
+                                        position: "top"
+                                    },
+                                    itemStyle: {
+                                        color: "#EC9F38"
+                                    },
+                                    //  data: [5, 20, 36, 10, 10, 20]
+                                    data: []
+                                }
+                            ]
+                        }
+                    },
+                    //录音
+                    tape: {
+                        //加载中
+                        loading: false,
+                        search: {
+                            //starttime: fecha.prevDate(new Date(), 7),
+                            //endtime: new Date(),
+                            starttime: "",
+                            endtime: "",
+                            keyword: ""
+                        },
+                        pageNum: 1,
+                        pageSize: 10
+                    },
+                    //设置
+                    set: {
+                        databaseAddress: "",
+                        databaseName: "",
+                        databasePwd: "",
+                        username: "",
+                        anothername: ""
+                    }
+                },
+                ruleForm: {
+                    databaseAddress: '',
+                    databaseName: '',
+                    username: '',
+                    databasePwd: ''
+
+                },
+                rules: {
+                    databaseAddress: [
+                        { required: true, message: '请输入数据库地址', trigger: 'blur' }
+                    ],
+                    databaseName: [
+                        { required: true, message: '请输入数据库名称', trigger: 'blur' }
+                    ],
+                    username: [
+                        { required: true, message: '请输入用户名', trigger: 'blur' }
+                    ],
+                    databasePwd: [
+                        { required: true, message: '请输入密码', trigger: 'blur' }
+                    ],
+                    databaseAnotherName: [
+                        { required: true, message: '请输入别名', trigger: 'blur' }
+                    ]
+
+                },
+                downloadurl: "",
+                audiourl: ""
+            },
+            created: function () {
+                this.window = window;
+                this.getCallRecords();
+                this.getSoundRecords();
+                this.getDatabaseInfos();
+                this.getStatistics();
+            },
+            mounted: function () {
+                window.myChart = echarts.init(document.getElementById('chartWrap'));
+
+            },
+            methods: {
+                //切换标签
+                setTab: function (value) {
+                    this.tab.current = value;
+                    var let = this;
+                    if (value === enums.tab.statistics) {
+                        let.tab.statistics.option.xAxis.data = [];
+                        let.tab.statistics.option.series[0].data = [];
+                        let.tab.statistics.option.series[1].data = [];
+                        let.tab.statistics.option.series[2].data = [];
+                        let.tab.record.list3 = [];
+                        let.getStatistics();
+                        myChart.setOption(let.tab.statistics.option);
+                        myChart.resize();
+                        
+                        //let.$nextTick(() => {
+                            
+                           
+                        //});
+                       
+                    };
+                    if (value === enums.tab.record) {
+                        let.tab.record.list = [];
+                        let.getCallRecords();
+                    };
+                    if (value === enums.tab.tape) {
+                        let.tab.record.list1 = [];
+                        this.getSoundRecords();
+                    }
+                   
+
+
+                },
+                getCallRecords: function () {//获取全部通话记录
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getPages",
+                        params: {
+                            pageNum: this.tab.record.page,
+                            pageSize: this.tab.record.pagesize,
+                            keyword: this.tab.record.keyword
+                        }
+                    }).then(function (response) {
+                        this.tab.record.loading = false;
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        if (body.Code === 0) {
+                            this.tab.record.list = this.tab.record.list.concat(body.Data.data);
+                        } else {
+
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            })
+                        }
+                        // this.record.list = response.data;
+                    }, function (error) {
+                        console.error(error);
+                    })
+                },
+                getSoundRecords: function () { //获取全部录音记录
+                    if (moment(this.tab.tape.search.starttime).format("YYYY-MM-DD") > moment(this.tab.tape.search.endtime).format("YYYY-MM-DD")) {
+                        this.$message.error('起始时间不得大于结束时间');
+                    }
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getSoundRecordAll",
+                        params: {
+                            pageNum: this.tab.tape.pageNum,
+                            pageSize: this.tab.tape.pageSize,
+                            starttime: moment(this.tab.tape.search.starttime).format("YYYY-MM-DD"),
+                            endtime: moment(this.tab.tape.search.endtime).format("YYYY-MM-DD"),
+                            keyword: this.tab.tape.search.keyword
+                        }
+                    }).then(function (response) {
+                        this.tab.tape.loading = false;
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        //this.tab.record.list1 = this.tab.record.list1.concat(body.Data.data);
+                        //if (body.Code != 0) {
+                        //    this.$message({
+                        //        type: "error",
+                        //        message: body.Msg,
+                        //    });
+                        //}
+                        if (body.Code === 0) {
+                            this.tab.record.list1 = this.tab.record.list1.concat(body.Data.data);
+                        } else {
+                           
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            });
+                            this.tab.record.list1 = this.tab.record.list1.concat(body.Data.data);
+                        }
+                    }, function (error) {
+                        this.$message({
+                            type: "error",
+                            message: body.Msg
+                        })
+                    })
+                },
+                getDatabaseInfos: function () {
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getDatabaseInfoAll",
+                    }).then(function (response) {
+                        console.log(response)
+                        let body = JSON.parse(response.body);
+                        console.log(body);
+                        if (body.Code === 0) {
+                           // let m = "<el-button type='primary' icon='el - icon - delete' v-model='tab.record.list2.pkid'></el-button>"
+
+                            this.tab.record.list2 = body.Data;
+                            //this.tab.record.list2.push(m);
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg,
+                            })
+                        }
+                    }, function (error) {
+                        this.$message({
+                            type: "error",
+                            message: body.Msg
+                        })
+                    })
+                },
+                addDatabase: function () {
+                    this.$http.post("/api/data/AddDataBase", null, {
+                        params: {
+                            databaseAddress: this.tab.set.databaseAddress,
+                            databaseName: this.tab.set.databaseName,
+                            databasePwd: this.tab.set.databasePwd,
+                            username: this.tab.set.username,
+                            anothername: this.tab.set.anothername
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.$message.success("添加成功！");
+                            this.tab.record.list2 = [];
+                            this.getDatabaseInfos();
+                            //this.getCallRecords();
+                            //this.getSoundRecords();
+                            //this.getStatistics();
+                            this.tab.set.databaseAddress = "";
+                            this.tab.set.databaseName = "";
+                            this.tab.set.databasePwd = "";
+                            this.tab.set.username = "";
+                            this.tab.set.anothername = "";
+                            //location.href = "/home/index";
+
+
+                            // window.location.reload();
+
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+
+                    }, (error) => {
+                        this.$message({
+                            type: "error",
+                            message: error
+                        })
+                    })
+                },
+                check: function () {
+                    console.log("密码：" + this.tab.set.databasePwd);
+                    console.log("地址：" + this.tab.set.databaseAddress);
+                    console.log("数据库名：" + this.tab.set.databaseName);
+                    console.log("用户名：" + this.tab.set.username);
+                    console.log("别名：" + this.tab.set.anothername);
+                    this.$http.post("/api/data/CheckDataBase", null, {
+                        params: {
+                            databaseAddress: this.tab.set.databaseAddress,
+                            databaseName: this.tab.set.databaseName,
+                            databasePwd: this.tab.set.databasePwd,
+                            username: this.tab.set.username,
+                            anothername: this.tab.set.anothername
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.$message({
+                                type: "success",
+                                message: body.Msg
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                    }, (error) => {
+                        this.$message({
+                            type: "error",
+                            message: error
+                        })
+                    })
+                },
+                searchCallRecord: function () {
+                    this.tab.record.list = [];
+                    this.tab.record.page = 1;
+                    this.getCallRecords();
+                    /**
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getPages",
+                        params: {
+                            keyword: this.tab.record.keyword,
+                            pageNum: this.tab.record.page,
+                            pageSize: this.tab.record.pagesize
+                        }
+                    }).then((res) => {
+                        this.tab.record.loading = false;
+                        console.log(res)
+                        let body = JSON.parse(res.body);
+                        console.log(body);
+                        if (body.Code === 0) {
+                            this.tab.record.list = body.Data.data;
+                        } else {
+                            this.tab.record.list = [];
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                        }, (error) => {
+                            this.$message({
+                                type: "error",
+                                message:error
+                            })
+                        })
+                        **/
+                },
+                searchSoundRecord: function () {
+                    this.tab.record.list1 = [];
+                    this.tab.tape.pageNum = 1;
+                    this.getSoundRecords();
+
+                    //console.log(this.tab.tape.search.starttime);
+                    //console.log(moment(this.tab.tape.search.starttime).format("YYYY-MM-DD"));
+                    //console.log(moment(this.tab.tape.search.endtime).format("YYYY-MM-DD"));
+                    //console.log(this.tab.tape.search.keyword);
+                    //this.$http({
+                    //    methods: 'GET',
+                    //    url: "/api/data/getSoundRecordAll",
+                    //    params: {
+                    //        pageNum: this.tab.tape.pageNum,
+                    //        pageSize: this.tab.tape.pageSize,
+                    //        starttime: moment(this.tab.tape.search.starttime).format("YYYY-MM-DD"),
+                    //        endtime: moment(this.tab.tape.search.endtime).format("YYYY-MM-DD"),
+                    //        keyword: this.tab.tape.search.keyword
+                    //    }
+
+                    //}).then((res) => {
+
+                    //    let body = JSON.parse(res.body);
+                    //    console.log(body);
+                    //    if (body.Code === 0) {
+                    //        this.tab.record.list1 = body.Data.data;
+                    //    } else {
+                    //        this.tab.record.list1 = [];
+                    //        this.$message({
+                    //            type: "error",
+                    //            message: body.Msg
+                    //        })
+                    //    }
+                    //    }, (error) => {
+                    //        this.$message({
+                    //            type: "error",
+                    //            message: error
+                    //        })
+                    //    })
+
+                },
+                //获取统计数据
+
+                getStatistics: function () {
+                    var let = this;
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/getStatistics"
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+                        if (body.Code === 0) {
+                            this.tab.record.list3 = body.Data;
+                            console.log("长度" + body.Data.length)
+
+                            for (var i = 0; i < body.Data.length; i++) {
+                                this.tab.statistics.option.xAxis.data.push(body.Data[i].databaseAnotherName);
+                                this.tab.statistics.option.series[0].data.push(body.Data[i].dayTotal);
+                                this.tab.statistics.option.series[1].data.push(body.Data[i].weekTotal);
+                                this.tab.statistics.option.series[2].data.push(body.Data[i].monthTotal);
+                            }
+                            myChart.setOption(let.tab.statistics.option);
+                            myChart.resize();
+                            //console.log(this.tab.statistics.option.xAxis.data.length);
+                            //console.log(this.tab.statistics.option.xAxis.data[0]);
+                            //console.log(this.tab.statistics.option.xAxis.data[1]);
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                    }, (error) => {
+                        this.$message({
+                            type: "error",
+                            message: error
+                        })
+                    })
+                },
+                //导出Excel
+                exportExcel: function () {
+                    console.log(this.tab.record.list);
+                    this.$http.post("/api/data/exportExcel", null, {
+                        params: {
+                            keyword: this.tab.record.keyword,
+                        }
+                    }).then((res) => {
+                        let body = JSON.parse(res.body);
+
+                        if (body.Code === 0) {
+                            this.downloadurl = body.Data + "?" + Math.random();
+                            this.$message({
+                                type: "success",
+                                message: body.Msg
+                            })
+                        } else {
+                            this.$message({
+                                type: "error",
+                                message: body.Msg
+                            })
+                        }
+                    }, (error) => {
+                        this.$message({
+                            type: "error",
+                            message: error
+                        })
+                    })
+
+                },
+                //重置表单
+                reset: function () {
+                    this.$refs["ruleForm"].resetFields();
+                },
+                //更多记录
+                morerecord: function () {
+                    console.log("morerecord");
+                    if (!this.tab.record.loading) {
+                        this.tab.record.page++;
+                        this.getCallRecords();
+                    }
+                },
+                //更多的录音记录
+                moreSoundsrecord: function () {
+                    if (!this.tab.tape.loading) {
+                        this.tab.tape.pageNum++;
+                        this.getSoundRecords();
+                    }
+                },
+                //录音 单元格点击
+                tapeCellClick: function (row, column) {
+                    
+                        if (column.property === "fileName") {
+                            console.log(row);
+                            this.audiourl = row.filePath;
+                            this.$nextTick(() => {
+                                this.$refs.audio.play();
+                            })
+                        }
+                    
+                },
+                //播放失败
+                palyerror: function (err) {
+                    if (!this.audiourl == "") {
+                        this.$message.error("文件未找到！");
+                    }
+                    
+                },
+                //删除数据库
+                handleClick(row) {
+                    console.log(row);
+                    this.$http({
+                        methods: 'GET',
+                        url: "/api/data/DeleteDatabase",
+                        params: {
+                            pkid: row.pkid
+                        }
+                    }).then(function (res) {
+                        console.log(res);
+                        let data = JSON.parse(res.body);
+                        if (data.Code === 0) {
+                            this.$message({
+                                type: "success",
+                                message: data.Msg,
+                            });
+                            this.tab.record.list2 = [];
+                            this.getDatabaseInfos();
+                            }else {
+                            this.$message({
+                                type: "error",
+                                message: data.Msg,
+                            })
+                        }
+                        }, function (err) {
+                            this.$message({
+                                type: "error",
+                                message: data.Msg,
+                            })
+                    })
+                },
+              
+                //退出
+                LogOut() {
+                    this.$confirm('此操作将退出, 是否继续?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        //this.$message({
+                        //    type: 'success',
+                        //    message: '退出成功!'
+                        //});
+                        //setTimeout(function () { location.href = "/home/Login"; }, 4000);
+                        location.href = "/home/Login";
+                        
+                    }).catch(() => {
+                        //this.$message({
+                        //    type: 'info',
+                        //    message: '已取消退出'
+                        //});
+                    });
+                }
+
+            }
+        })
+    </script> 
+</body>
+</html>

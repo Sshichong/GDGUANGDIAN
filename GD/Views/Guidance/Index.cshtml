@@ -1,0 +1,38 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>setGuidInformation</h2>
+
+@if (ViewBag.Message != null)
+{
+    <p style="color:red">
+        @ViewBag.Message
+    </p>
+}
+<form action="/Guidance/SetGuidInformation" method="post">
+    <div style="float:left">
+        数据库地址：<input type="text" name="datebaseAddress" style="margin-bottom：20px" /><br />
+        用户名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="userName" style="margin-bottom：20px" /><br />
+        别名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="anotherName" style="margin-bottom：20px"/><br />
+    </div>
+
+    <div style="margin-left:50px">
+        数据库名称：<input type="text" name="databaseName" style="margin-bottom：20px"/><br />
+        密码：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" name="databasePwd" style="margin-bottom：20px"/><br />
+        用户名：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="recordUserName" style="margin-bottom：20px"/>
+    </div>
+    <hr />
+    <div style="clear:both;float:left">
+        录音地址：<input type="text" name="recordAddress" style="margin-bottom：20px" /><br />
+        密码：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="password" name="recordPwd" style="margin-bottom：20px" /><br />
+    </div>
+    <div style="clear:both;float:left">
+        <input type="submit" value="加入" />
+    </div>
+</form>
+
+<div style="clear:both;float:left">
+    &nbsp;
+</div>

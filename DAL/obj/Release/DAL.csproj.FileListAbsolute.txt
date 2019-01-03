@@ -1,0 +1,10 @@
+D:\gd\trunk\DAL\bin\Release\DAL.dll
+D:\gd\trunk\DAL\bin\Release\DAL.pdb
+D:\gd\trunk\DAL\bin\Release\Model.dll
+D:\gd\trunk\DAL\bin\Release\MySql.Data.dll
+D:\gd\trunk\DAL\bin\Release\Model.pdb
+D:\gd\trunk\DAL\obj\Release\DAL.csprojAssemblyReference.cache
+D:\gd\trunk\DAL\obj\Release\DAL.csproj.CoreCompileInputs.cache
+D:\gd\trunk\DAL\obj\Release\DAL.csproj.CopyComplete
+D:\gd\trunk\DAL\obj\Release\DAL.dll
+D:\gd\trunk\DAL\obj\Release\DAL.pdb

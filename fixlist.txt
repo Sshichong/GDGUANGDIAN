@@ -1,0 +1,158 @@
+﻿/************************************************************************/
+Date:					[2019-01-02 16:40]
+main Version:				1.0.0
+module Version:				1.0.0
+module name:				GD.dll
+By:					施冲 
+Label:					
+【add】
+	
+【fix】
+    	修复添加或删除完数据库后再点击其他标签内容不变
+【change】
+      
+【config】    
+    
+【release votes】    
+web.config中配置数据库
+存放sqlserver数据库信息的数据库
+<add key="mysqlConnection" value="Database='gd';Data Source='192.1.2.170';User Id='root';Password='root';charset='utf8';pooling=true"/>
+
+存放登录者账号密码的数据库
+<add key="sqlserverConnection" value="server ='192.1.2.210';uid = 'sa';pwd = '123456'; database = 'EQM_BJ'"/>
+设置中添加的数据库为SQLServer
+	
+【remark】
+
+依赖数据库脚本
+ 工作量：
+ 施冲：0.5d
+/************************************************************************/
+Date:					[2019-12-29 9:30]
+main Version:				1.0.0
+module Version:				1.0.0
+module name:				GD.dll
+By:					施冲 
+Label:					
+【add】
+	
+【fix】
+    	修复关键字查询频率后导出无内容
+	修改录音记录的文件大小为开始时间和结束时间
+	修复通话记录中频率与主持人相同时查询出错
+	修复录音记录中频率与文件名称相同时查询出错
+	修改录音记录中时间为空白
+【change】
+      
+【config】    
+    
+【release votes】    
+web.config中配置数据库
+存放sqlserver数据库信息的数据库
+<add key="mysqlConnection" value="Database='gd';Data Source='192.1.2.170';User Id='root';Password='root';charset='utf8';pooling=true"/>
+
+存放登录者账号密码的数据库
+<add key="sqlserverConnection" value="server ='192.1.2.210';uid = 'sa';pwd = '123456'; database = 'EQM_BJ'"/>
+设置中添加的数据库为SQLServer
+	
+【remark】
+
+依赖数据库脚本
+ 工作量：
+ 施冲：2d
+/************************************************************************/
+Date:					[2019-12-26 15:30]
+main Version:				1.0.0
+module Version:				1.0.0
+module name:				GD.dll
+By:					施冲 
+Label:					
+【add】
+	增加判断数据库是否有目标表并有错误提示
+【fix】
+    	修复测试环境登录后报错
+【change】
+      
+【config】    
+    
+【release votes】    
+web.config中配置数据库
+存放sqlserver数据库信息的数据库
+<add key="mysqlConnection" value="Database='gd';Data Source='192.1.2.170';User Id='root';Password='root';charset='utf8';pooling=true"/>
+
+存放登录者账号密码的数据库
+<add key="sqlserverConnection" value="server ='192.1.2.210';uid = 'sa';pwd = '123456'; database = 'EQM_BJ'"/>
+设置中添加的数据库为SQLServer
+	
+【remark】
+
+依赖数据库脚本
+ 工作量：
+ 施冲：1d
+/************************************************************************/
+Date:					[2019-12-25 15:30]
+main Version:				1.0.0
+module Version:				1.0.0
+module name:				GD.dll
+By:					施冲 
+Label:					
+【add】
+	1.增加退出功能
+	2.增加删除数据库功能
+	3.增加录音查询时起始时间大于结束时间时的错误提示
+	4.增加登陆界面用户名可省略前后空格
+【fix】
+    	1.修复添加数据库后无提示
+	2.修复录音试听无法播放时无提示
+	3.修复录音模糊查询匹配到时长
+	4.修复通话记录模糊查询时匹配到时长
+	5.修复登录失败无提示
+【change】
+      
+【config】    
+    
+【release votes】    
+web.config中配置数据库
+存放sqlserver数据库信息的数据库
+<add key="mysqlConnection" value="Database='gd';Data Source='192.1.2.170';User Id='root';Password='root';charset='utf8';pooling=true"/>
+
+存放登录者账号密码的数据库
+<add key="sqlserverConnection" value="server ='192.1.2.210';uid = 'sa';pwd = '123456'; database = 'EQM_BJ'"/>
+设置中添加的数据库为SQLServer
+	
+【remark】
+
+依赖数据库脚本
+ 工作量：
+ 施冲：6d 
+/************************************************************************/
+Date:					[2019-12-14 11:00]
+main Version:				1.0.0
+module Version:				1.0.0
+module name:				GD.dll
+By:					施冲 张科
+Label:					
+【add】
+	1.登录认证
+	2.通话记录分页，模糊查询及导出
+	3.统计通话记录
+	4.电话录音分页，模糊查询及试听播放
+	5.数据库设置及显示全部数据库
+【fix】
+    
+【change】
+      
+【config】    
+    
+【release votes】    
+web.config中配置数据库
+<add key="mysqlConnection" value="Database='gd';Data Source='192.1.2.170';User Id='root';Password='root';charset='utf8';pooling=true"/>
+
+设置中添加的数据库为SQLServer
+	
+【remark】
+
+依赖数据库脚本
+ 工作量：
+ 施冲：14d 
+ 张科：3d

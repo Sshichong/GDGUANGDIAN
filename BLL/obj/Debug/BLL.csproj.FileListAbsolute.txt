@@ -1,0 +1,17 @@
+D:\gd\trunk\BLL\bin\Debug\BLL.dll
+D:\gd\trunk\BLL\bin\Debug\BLL.pdb
+D:\gd\trunk\BLL\bin\Debug\DAL.dll
+D:\gd\trunk\BLL\bin\Debug\Model.dll
+D:\gd\trunk\BLL\bin\Debug\MySql.Data.dll
+D:\gd\trunk\BLL\bin\Debug\DAL.pdb
+D:\gd\trunk\BLL\bin\Debug\Model.pdb
+D:\gd\trunk\BLL\obj\Debug\BLL.csprojAssemblyReference.cache
+D:\gd\trunk\BLL\obj\Debug\BLL.csproj.CoreCompileInputs.cache
+D:\gd\trunk\BLL\obj\Debug\BLL.csproj.CopyComplete
+D:\gd\trunk\BLL\obj\Debug\BLL.dll
+D:\gd\trunk\BLL\obj\Debug\BLL.pdb
+D:\gd\trunk\BLL\bin\Debug\ICSharpCode.SharpZipLib.dll
+D:\gd\trunk\BLL\bin\Debug\NPOI.dll
+D:\gd\trunk\BLL\bin\Debug\NPOI.OOXML.dll
+D:\gd\trunk\BLL\bin\Debug\NPOI.OpenXml4Net.dll
+D:\gd\trunk\BLL\bin\Debug\NPOI.OpenXmlFormats.dll
